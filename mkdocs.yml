@@ -1,0 +1,21 @@
+site_name: Hawk SDK Documentation
+site_url: https://hawk.so/docs/sdk/
+theme:
+  name: material
+  font:
+    text: Merriweather Sans
+    code: Fira Code
+  palette:
+    - scheme: slate
+      toggle:
+        icon: material/weather-night
+        text: Dark mode
+      primary: black
+      accent: indigo
+
+    - scheme: default
+      toggle:
+        icon: material/weather-sunny
+        text: Light mode
+      primary: red
+      accent: deep orange
