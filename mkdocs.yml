@@ -1,5 +1,5 @@
 site_name: Hawk SDK
-site_url: https://hawk.so/docs/sdk/
+site_url: https://hawk-center.github.io/hawk-sdk/
 theme:
   name: material
   font:
