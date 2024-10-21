@@ -24,7 +24,7 @@ class FuturesRepository:
     def fetch_ohlcvo(self, start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> Iterator[dict]:
         """Fetches raw data from BigQuery for the given date range and hawk_ids using query parameters."""
 
-        query = """
+        query = f"""
         WITH records_data AS (
           SELECT 
             r.record_timestamp AS date,
@@ -34,14 +34,14 @@ class FuturesRepository:
             MAX(CASE WHEN f.field_name = @low_field THEN r.double_value END) AS low,
             MAX(CASE WHEN f.field_name = @close_field THEN r.double_value END) AS close,
             MAX(CASE WHEN f.field_name = @volume_field THEN r.int_value END) AS volume,
-            MAX(CASE WHEN f.field_name = @open_interest_field THEN r.double_value END) AS open_interest
+            MAX(CASE WHEN f.field_name = @open_interest_field THEN r.int_value END) AS open_interest
           FROM 
-            `wsb-hc-qasap-ae2e.@environment.records` AS r
+            `wsb-hc-qasap-ae2e.{self.environment}.records` AS r
           JOIN 
-            `wsb-hc-qasap-ae2e.@environment.fields` AS f
+            `wsb-hc-qasap-ae2e.{self.environment}.fields` AS f
             ON r.field_id = f.field_id
           JOIN 
-            `wsb-hc-qasap-ae2e.@environment.hawk_identifiers` AS hi
+            `wsb-hc-qasap-ae2e.{self.environment}.hawk_identifiers` AS hi
             ON r.hawk_id = hi.hawk_id
           WHERE 
             r.hawk_id IN UNNEST(@hawk_ids)
@@ -75,7 +75,6 @@ class FuturesRepository:
             bigquery.ScalarQueryParameter("close_field", "STRING", f"close_{interval}"),
             bigquery.ScalarQueryParameter("volume_field", "STRING", f"volume_{interval}"),
             bigquery.ScalarQueryParameter("open_interest_field", "STRING", f"open_interest_{interval}"),
-            bigquery.ScalarQueryParameter("environment", "string", self.environment),
         ]
 
         job_config = bigquery.QueryJobConfig(query_parameters=query_params)

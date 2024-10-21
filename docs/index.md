@@ -19,6 +19,7 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
 ---
 
 # Docs
+
 === "Futures"
 
     The `Futures` class serves as an API to fetch open, high, low, close, volume, and open interest (OHLCVO) data from the Hawk Global Futures repository using specified date ranges and intervals.
@@ -79,8 +80,9 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
     - **Returns**: A `DataObject` containing the resulting Hawk IDs.
 
 === "DataObject"
-    The `DataObject` class is returned by the SDK classes. It contains the data for the response and allows you to access the data in a more structured way.
-    
+The `DataObject` class is returned by the SDK classes. It contains the data for the response and allows you to access
+the data in a more structured way.
+
     ### Methods
     
     #### to_df

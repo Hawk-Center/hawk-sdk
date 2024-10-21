@@ -27,12 +27,12 @@ class SystemRepository:
         :param tickers: A list of ticker strings to filter by.
         :return: An iterator over raw data rows.
         """
-        query = """
+        query = f"""
         SELECT 
             value AS ticker, 
             hawk_id
         FROM 
-            `wsb-hc-qasap-ae2e.@environment.hawk_identifiers`
+            `wsb-hc-qasap-ae2e.{self.environment}.hawk_identifiers`
         WHERE 
             id_type = 'TICKER'
             AND value IN UNNEST(@ticker_list)
@@ -40,7 +40,6 @@ class SystemRepository:
 
         query_params = [
             bigquery.ArrayQueryParameter("ticker_list", "STRING", tickers),
-            bigquery.ScalarQueryParameter("environment", "string", self.environment),
         ]
 
         job_config = bigquery.QueryJobConfig(query_parameters=query_params)
