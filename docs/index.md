@@ -26,12 +26,12 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
     ### Initialization
     
     ```python
-    def __init__(self, project_id: str, credentials_path: str = None)
+    def __init__(self, environment: str = "production", credentials_path: str = None)
     ```
     
-    Initializes the `Futures` datasource with a Google Cloud project ID and optional credentials file.
+    Initializes the `Futures` datasource with an environment and optional credentials file.
     
-    - **project_id**: The Google Cloud Platform (GCP) project ID.
+    - **environment**: (Optional) The GCP environment to use. The decides which dataset to query. Default is `"production"`. You may optionally set this to `"development"`.
     - **credentials_path**: (Optional) Path to the Google Cloud credentials file. Not necessary if you set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
     
     ### Methods
@@ -49,6 +49,34 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
     - **interval**: The interval for the data query (e.g., `'1d'`).
     - **hawk_ids**: A list of Hawk IDs to filter by.
     - **Returns**: A `DataObject` containing the resulting OHLCVO data.
+
+=== "System"
+
+    The `System` class serves as an API to fetch Hawk IDs based on a list of tickers from the Hawk Global System repository.
+    
+    ### Initialization
+    
+    ```python
+    def __init__(self, environment: str = "production", credentials_path: str = None)
+    ```
+    
+    Initializes the `System` datasource with an environment and optional credentials file.
+    
+    - **environment**: (Optional) The GCP environment to use. The decides which dataset to query. Default is `"production"`. You may optionally set this to `"development"`.
+    - **credentials_path**: (Optional) Path to the Google Cloud credentials file. Not necessary if you set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
+    
+    ### Methods
+    
+    #### get_hawk_ids
+    
+    ```python
+    def get_hawk_ids(self, tickers: List[str]) -> DataObject
+    ```
+    
+    Fetches Hawk IDs based on a list of ticker strings.
+    
+    - **tickers**: A list of ticker strings to filter by.
+    - **Returns**: A `DataObject` containing the resulting Hawk IDs.
 
 === "DataObject"
     The `DataObject` class is returned by the SDK classes. It contains the data for the response and allows you to access the data in a more structured way.
