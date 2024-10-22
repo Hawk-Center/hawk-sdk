@@ -51,6 +51,23 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
     - **hawk_ids**: A list of Hawk IDs to filter by.
     - **Returns**: A `DataObject` containing the resulting OHLCVO data.
 
+    #### get_hgf_model_state
+
+    ```python
+    def get_hgf_model_state(self, start_date: str, end_date: str, short_ema: int, long_ema: int) -> DataObject
+    ```
+    
+    Fetches Hawk Global Futures (HGF) model state data for a given date range, using specified short and long exponential moving average (EMA) parameters.
+    
+    - **start_date**: The start date for the data query, in the format `YYYY-MM-DD`.
+    - **end_date**: The end date for the data query, in the format `YYYY-MM-DD`.
+    - **short_ema**: The short EMA period to calculate the model state.
+    - **long_ema**: The long EMA period to calculate the model state.
+    - **Returns**: A `DataObject` containing the model state data.
+    - **Raises**: `ValueError` if the short EMA period is longer than the long EMA period.
+    
+    This method provides a useful tool for analyzing market trends by comparing short-term and long-term moving averages across specified time frames. The data returned helps in identifying possible entry and exit points based on moving average crossovers.
+
 === "System"
 
     The `System` class serves as an API to fetch Hawk IDs based on a list of tickers from the Hawk Global System repository.
@@ -80,8 +97,8 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
     - **Returns**: A `DataObject` containing the resulting Hawk IDs.
 
 === "DataObject"
-The `DataObject` class is returned by the SDK classes. It contains the data for the response and allows you to access
-the data in a more structured way.
+
+    The `DataObject` class is returned by the SDK classes. It contains the data for the response and allows you to access the data in a more structured way.
 
     ### Methods
     
