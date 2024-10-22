@@ -1,5 +1,5 @@
 """
-@description: Datasource API for Hawk Global System data access and export functions.
+@description: Datasource API for Hawk System data access and export functions.
 @author: Rithwik Babu
 """
 from typing import List
