@@ -53,7 +53,7 @@ pip install dist/your_package_name-X.Y.Z-py3-none-any.whl
 ```
 
 ### 6. Upload to PyPI
-Once you’re satisfied with the package, upload it to PyPI:
+Once you’re satisfied with the package, upload it to PyPI. Contact Rithwik for the pypi API key:
 
 ```bash
 twine upload dist/*
