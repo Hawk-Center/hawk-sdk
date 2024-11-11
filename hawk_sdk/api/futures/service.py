@@ -2,12 +2,11 @@
 @description: Service layer for processing and normalizing Futures data.
 @author: Rithwik Babu
 """
-from datetime import datetime, timedelta
 from typing import List, Iterator
 
 import pandas as pd
 
-from hawk_sdk.futures.repository import FuturesRepository
+from hawk_sdk.api.futures.repository import FuturesRepository
 
 
 class FuturesService:
@@ -31,37 +30,6 @@ class FuturesService:
         """
         raw_data = self.repository.fetch_ohlcvo(start_date, end_date, interval, hawk_ids)
         return self._normalize_data(raw_data)
-
-    def get_hgf_model_state(
-            self, start_date: str, end_date: str, short_ema: int, long_ema: int
-    ) -> pd.DataFrame:
-        """Fetches and normalizes data into a pandas DataFrame.
-
-        :param start_date: The start date for the data query.
-        :param end_date: The end date for the data query.
-        :param short_ema: The short exponential moving average period.
-        :param long_ema: The long exponential moving average period.
-        :return: A pandas DataFrame containing the model state data.
-        """
-        adjusted_start_date = (
-                datetime.strptime(start_date, "%Y-%m-%d") - timedelta(days=long_ema)
-        ).strftime("%Y-%m-%d")
-
-        raw_data = self.repository.fetch_ohlcvo(
-            start_date=adjusted_start_date,
-            end_date=end_date,
-            interval="1d",
-            hawk_ids=list(range(20000, 20023))
-        )
-
-        raw_df = self._normalize_data(raw_data)
-
-        raw_df[f'EMA_{short_ema}'] = raw_df['close'].ewm(span=short_ema, adjust=False).mean()
-        raw_df[f'EMA_{long_ema}'] = raw_df['close'].ewm(span=long_ema, adjust=False).mean()
-
-        raw_df = raw_df[raw_df['date'] >= start_date]
-
-        return raw_df
 
     @staticmethod
     def _normalize_data(data: Iterator[dict]) -> pd.DataFrame:

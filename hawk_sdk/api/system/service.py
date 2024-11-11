@@ -7,7 +7,7 @@ from typing import List, Iterator
 
 import pandas as pd
 
-from hawk_sdk.system.repository import SystemRepository
+from hawk_sdk.api.system.repository import SystemRepository
 
 
 class SystemService:

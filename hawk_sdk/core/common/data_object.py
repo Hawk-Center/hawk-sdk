@@ -1,3 +1,7 @@
+"""
+@description: Data Object class to handle output transformations.
+@author: Rithwik Babu
+"""
 import pandas as pd
 
 
