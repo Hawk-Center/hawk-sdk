@@ -24,7 +24,7 @@ class Futures:
     def get_ohlcvo(self, start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> DataObject:
         """Fetch open, high, low, close, volume, and open interest data for the given date range and hawk_ids.
 
-        :param start_date: The start date for the data query (YYYY-MM-DD).
+        :param start_date:    %The start date for the data query (YYYY-MM-DD).
         :param end_date: The end date for the data query (YYYY-MM-DD).
         :param interval: The interval for the data query (e.g., '1d', '1h', '1m').
         :param hawk_ids: A list of specific hawk_ids to filter by.
