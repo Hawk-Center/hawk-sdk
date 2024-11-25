@@ -3,7 +3,7 @@ Here is a simple example of how to use the Hawk SDK to fetch Hawk IDs based on a
 Assuming you have followed the setup instructions properly, you can use the following code to fetch Hawk IDs for a given list of tickers.
 
 ```python
-from hawk_sdk import System
+from hawk_sdk.api import System
 
 # Initialize the System Source
 system = System()

@@ -6,10 +6,10 @@ from typing import List
 
 from google.cloud import bigquery
 
-from hawk_sdk.common.constants import PROJECT_ID
-from hawk_sdk.common.data_object import DataObject
-from hawk_sdk.system.repository import SystemRepository
-from hawk_sdk.system.service import SystemService
+from hawk_sdk.core.common.constants import PROJECT_ID
+from hawk_sdk.core.common.data_object import DataObject
+from hawk_sdk.api.system.repository import SystemRepository
+from hawk_sdk.api.system.service import SystemService
 
 
 class System:
