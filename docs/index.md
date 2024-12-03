@@ -16,6 +16,8 @@ Set your environment variables to access the data:
 export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
 ```
 
+NOTE: The database and SDK use UTC time for all timestamps.
+
 ---
 
 # Docs
