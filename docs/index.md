@@ -51,6 +51,25 @@ export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
     - **hawk_ids**: A list of Hawk IDs to filter by.
     - **Returns**: A `DataObject` containing the resulting OHLCVO data.
 
+    #### get_snapshot
+
+    ```python
+    def get_snapshot(self, timestamp: str, hawk_ids: List[int]) -> DataObject
+    ```
+    
+    Fetches snapshot data for a given timestamp and list of Hawk IDs. The snapshot data includes key metrics such as the most recent values for close, high, low, cumulative volume, bid, and ask prices as of the specified timestamp.
+    
+    - **timestamp**: The cutoff timestamp for the data query, in the format `YYYY-MM-DD HH:MM:SS`.
+    - **hawk_ids**: A list of Hawk IDs to filter by.
+    - **Returns**: A `DataObject` containing the resulting snapshot data, including columns:
+        - `close_snapshot`
+        - `high_snapshot`
+        - `low_snapshot`
+        - `cvol_snapshot` (cumulative volume)
+        - `bid_snapshot`
+        - `ask_snapshot`
+        - Along with the associated `date` and `ticker` for each Hawk ID.
+
 === "System"
 
     The `System` class serves as an API to fetch Hawk IDs based on a list of tickers from the Hawk Global System repository.

@@ -22,8 +22,7 @@ class FuturesRepository:
         self.environment = environment
 
     def fetch_ohlcvo(self, start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> Iterator[dict]:
-        """Fetches raw data from BigQuery for the given date range and hawk_ids using query parameters."""
-
+        """Fetches raw OHLCVO data from BigQuery for the given date range and hawk_ids using query parameters."""
         query = f"""
         WITH records_data AS (
           SELECT 
@@ -84,4 +83,61 @@ class FuturesRepository:
             return query_job.result()
         except Exception as e:
             logging.error(f"Failed to fetch OHLCVO data: {e}")
+            raise
+
+    def fetch_snapshot(self, timestamp: str, hawk_ids: List[int]) -> Iterator[dict]:
+        """Fetches the most recent snapshot data from BigQuery for the given time and hawk_ids."""
+        query = f"""
+        WITH records_data AS (
+            SELECT 
+                r.record_timestamp AS date,
+                hi.value AS ticker,
+                MAX(CASE WHEN f.field_name = 'close_snapshot' THEN r.double_value END) AS close_snapshot,
+                MAX(CASE WHEN f.field_name = 'high_snapshot' THEN r.double_value END) AS high_snapshot,
+                MAX(CASE WHEN f.field_name = 'low_snapshot' THEN r.double_value END) AS low_snapshot,
+                MAX(CASE WHEN f.field_name = 'cvol_snapshot' THEN r.int_value END) AS cvol_snapshot,
+                MAX(CASE WHEN f.field_name = 'bid_snapshot' THEN r.double_value END) AS bid_snapshot,
+                MAX(CASE WHEN f.field_name = 'ask_snapshot' THEN r.double_value END) AS ask_snapshot
+            FROM 
+                `wsb-hc-qasap-ae2e.{self.environment}.records` AS r
+            JOIN 
+                `wsb-hc-qasap-ae2e.{self.environment}.fields` AS f
+                ON r.field_id = f.field_id
+            JOIN 
+                `wsb-hc-qasap-ae2e.{self.environment}.hawk_identifiers` AS hi
+                ON r.hawk_id = hi.hawk_id
+            WHERE 
+                r.hawk_id IN UNNEST(@hawk_ids)
+                AND f.field_name IN ('close_snapshot', 'high_snapshot', 'low_snapshot', 'cvol_snapshot', 'bid_snapshot', 'ask_snapshot')
+                AND r.record_timestamp <= @timestamp
+            GROUP BY 
+                date, ticker
+        )
+        SELECT DISTINCT
+            date,
+            ticker,
+            close_snapshot,
+            high_snapshot,
+            low_snapshot,
+            cvol_snapshot,
+            bid_snapshot,
+            ask_snapshot
+        FROM 
+            records_data
+        ORDER BY 
+            date;
+        """
+
+        query_params = [
+            bigquery.ArrayQueryParameter("hawk_ids", "INT64", hawk_ids),
+            bigquery.ScalarQueryParameter("timestamp", "DATETIME", timestamp)
+        ]
+
+        job_config = bigquery.QueryJobConfig(query_parameters=query_params)
+
+        try:
+            query_job = self.bq_client.query(query, job_config=job_config)
+            return query_job.result()
+        except Exception as e:
+            logging.error(f"Failed to fetch snapshot data: {e}")
             raise
