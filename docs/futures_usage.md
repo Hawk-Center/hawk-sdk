@@ -27,3 +27,31 @@ df = response.to_df()
 # Export the Data to CSV
 response.to_csv("ohlcvo_data.csv")
 ```
+
+### Fetching Snapshot Data
+
+Below is an example demonstrating how to use the Hawk SDK to fetch snapshot data for a given timestamp and list of Hawk IDs.
+
+Assuming you have followed the setup and installation instructions properly, you can use the following code to fetch and display the snapshot data:
+
+```python
+from hawk_sdk.api import Futures
+
+# Initialize the Futures Source
+futures = Futures()
+
+# Fetch Snapshot Data
+response = futures.get_snapshot(
+    timestamp="2024-12-01 15:00:00",
+    hawk_ids=[20000, 20001, 20002, 20005]
+)
+
+# Display the Data
+response.show()
+
+# Export the Data to a DataFrame
+df = response.to_df()
+
+# Export the Data to CSV
+response.to_csv("snapshot_data.csv")
+```
