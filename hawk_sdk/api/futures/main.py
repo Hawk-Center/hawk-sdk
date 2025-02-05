@@ -4,12 +4,9 @@
 """
 from typing import List
 
-from google.cloud import bigquery
-
-from hawk_sdk.core.common.constants import PROJECT_ID
-from hawk_sdk.core.common.data_object import DataObject
 from hawk_sdk.api.futures.repository import FuturesRepository
 from hawk_sdk.api.futures.service import FuturesService
+from hawk_sdk.core.common.data_object import DataObject
 
 
 class Futures:
@@ -17,8 +14,7 @@ class Futures:
 
     def __init__(self, environment="production") -> None:
         """Initializes the Futures datasource with required configurations."""
-        self.connector = bigquery.Client(project=PROJECT_ID)
-        self.repository = FuturesRepository(self.connector, environment=environment)
+        self.repository = FuturesRepository(environment=environment)
         self.service = FuturesService(self.repository)
 
     def get_ohlcvo(self, start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> DataObject:
