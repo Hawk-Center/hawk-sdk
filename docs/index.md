@@ -15,6 +15,10 @@ Set your environment variables to access the data:
 ```bash
 export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
 ```
+or
+```bash
+export SERVICE_ACCOUNT_JSON="{\"type\":\"service_account\",\"project_id\":\"...\"}"
+```
 
 NOTE: The database and SDK use UTC time for all timestamps.
 
@@ -35,7 +39,6 @@ NOTE: The database and SDK use UTC time for all timestamps.
     Initializes the `Futures` datasource with an environment and optional credentials file.
     
     - **environment**: (Optional) The GCP environment to use. The decides which dataset to query. Default is `"production"`. You may optionally set this to `"development"`.
-    - **credentials_path**: (Optional) Path to the Google Cloud credentials file. Not necessary if you set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
     
     ### Methods
     
@@ -85,7 +88,6 @@ NOTE: The database and SDK use UTC time for all timestamps.
     Initializes the `System` datasource with an environment and optional credentials file.
     
     - **environment**: (Optional) The GCP environment to use. The decides which dataset to query. Default is `"production"`. You may optionally set this to `"development"`.
-    - **credentials_path**: (Optional) Path to the Google Cloud credentials file. Not necessary if you set the `GOOGLE_APPLICATION_CREDENTIALS` environment variable.
     
     ### Methods
     

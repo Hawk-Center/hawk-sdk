@@ -4,12 +4,9 @@
 """
 from typing import List
 
-from google.cloud import bigquery
-
-from hawk_sdk.core.common.constants import PROJECT_ID
-from hawk_sdk.core.common.data_object import DataObject
 from hawk_sdk.api.system.repository import SystemRepository
 from hawk_sdk.api.system.service import SystemService
+from hawk_sdk.core.common.data_object import DataObject
 
 
 class System:
@@ -17,8 +14,7 @@ class System:
 
     def __init__(self, environment="production") -> None:
         """Initializes the System datasource with required configurations."""
-        self.connector = bigquery.Client(project=PROJECT_ID)
-        self.repository = SystemRepository(self.connector, environment=environment)
+        self.repository = SystemRepository(environment=environment)
         self.service = SystemService(self.repository)
 
     def get_hawk_ids(self, tickers: List[str]) -> DataObject:

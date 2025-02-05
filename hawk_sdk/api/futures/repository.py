@@ -6,19 +6,19 @@ import logging
 from typing import Iterator, List
 
 from google.cloud import bigquery
-from google.cloud.bigquery import Client
+
+from hawk_sdk.core.common.utils import get_bigquery_client
 
 
 class FuturesRepository:
     """Repository for accessing Futures raw data."""
 
-    def __init__(self, bq_client: Client, environment: str) -> None:
+    def __init__(self, environment: str) -> None:
         """Initializes the repository with a BigQuery client.
 
-        :param bq_client: An instance of BigQuery Client.
         :param environment: The environment to fetch data from (e.g., 'production', 'development').
         """
-        self.bq_client = bq_client
+        self.bq_client = get_bigquery_client()
         self.environment = environment
 
     def fetch_ohlcvo(self, start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> Iterator[dict]:
