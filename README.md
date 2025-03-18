@@ -63,7 +63,3 @@ twine upload dist/*
 After uploading, verify the package has been successfully updated on PyPI by visiting your project page: 
 
 [https://pypi.org/project/your-package-name/](https://pypi.org/project/hawk-sd/)
-
----
-
-Let me know if you'd like any customization to fit your specific workflow!
