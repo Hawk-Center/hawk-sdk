@@ -30,15 +30,3 @@ class Futures:
             name="futures_ohlcvo",
             data=self.service.get_ohlcvo(start_date, end_date, interval, hawk_ids)
         )
-
-    def get_snapshot(self, timestamp: str, hawk_ids: List[int]) -> DataObject:
-        """Fetch snapshot data for the specified timestamp and hawk_ids.
-
-        :param timestamp: The timestamp for the data query (YYYY-MM-DD HH:MM:SS).
-        :param hawk_ids: A list of specific hawk_ids to filter by.
-        :return: A hawk DataObject containing the snapshot data.
-        """
-        return DataObject(
-            name="futures_snapshot",
-            data=self.service.get_snapshot(timestamp, hawk_ids)
-        )

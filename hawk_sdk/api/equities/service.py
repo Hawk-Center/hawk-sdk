@@ -19,7 +19,7 @@ class EquitiesService:
         """
         self.repository = repository
 
-    def get_adjusted_ohlc(self, start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> pd.DataFrame:
+    def get_adjusted_ohlcv(self, start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> pd.DataFrame:
         """Equities and normalizes data into a pandas DataFrame.
 
         :param start_date: The start date for the data query (YYYY-MM-DD).
@@ -28,7 +28,17 @@ class EquitiesService:
         :param hawk_ids: A list of specific hawk_ids to filter by.
         :return: A pandas DataFrame containing the normalized data.
         """
-        raw_data = self.repository.fetch_adjusted_ohlc(start_date, end_date, interval, hawk_ids)
+        raw_data = self.repository.fetch_adjusted_ohlcv(start_date, end_date, interval, hawk_ids)
+        return self._normalize_data(raw_data)
+
+    def get_adjusted_ohlcv_snapshot(self, timestamp: str, hawk_ids: List[int]) -> pd.DataFrame:
+        """Fetches and normalizes snapshot data for the given date and hawk_ids.
+
+        :param timestamp: The timestamp for the data query (YYYY-MM-DD HH:MM:SS).
+        :param hawk_ids: A list of specific hawk_ids to filter by.
+        :return: A pandas DataFrame containing the normalized data.
+        """
+        raw_data = self.repository.fetch_adjusted_ohlcv_snapshot(timestamp, hawk_ids)
         return self._normalize_data(raw_data)
 
     @staticmethod
