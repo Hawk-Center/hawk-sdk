@@ -31,16 +31,6 @@ class FuturesService:
         raw_data = self.repository.fetch_ohlcvo(start_date, end_date, interval, hawk_ids)
         return self._normalize_data(raw_data)
 
-    def get_snapshot(self, timestamp: str, hawk_ids: List[int]) -> pd.DataFrame:
-        """Fetches snapshot data and normalizes it into a pandas DataFrame.
-
-        :param timestamp: The timestamp for the data query (YYYY-MM-DD HH:MM:SS).
-        :param hawk_ids: A list of specific hawk_ids to filter by.
-        :return: A pandas DataFrame containing the normalized snapshot data.
-        """
-        raw_data = self.repository.fetch_snapshot(timestamp, hawk_ids)
-        return self._normalize_data(raw_data)
-
     @staticmethod
     def _normalize_data(data: Iterator[dict]) -> pd.DataFrame:
         """Converts raw data into a normalized pandas DataFrame.
