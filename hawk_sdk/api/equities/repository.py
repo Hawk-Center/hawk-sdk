@@ -92,42 +92,55 @@ class EquitiesRepository:
     def fetch_adjusted_ohlcv_snapshot(self, timestamp: str, hawk_ids: List[int]) -> Iterator[dict]:
         """Fetches the most recent snapshot data from BigQuery for the given time and hawk_ids."""
         query = f"""
-        WITH records_data AS (
-            SELECT 
-                r.record_timestamp AS date,
-                hi.value AS ticker,
-                MAX(CASE WHEN f.field_name = 'adjusted_open_snapshot' THEN r.double_value END) AS adjusted_open_snapshot,
-                MAX(CASE WHEN f.field_name = 'adjusted_high_snapshot' THEN r.double_value END) AS adjusted_high_snapshot,
-                MAX(CASE WHEN f.field_name = 'adjusted_low_snapshot' THEN r.double_value END) AS adjusted_low_snapshot,
-                MAX(CASE WHEN f.field_name = 'adjusted_close_snapshot' THEN r.double_value END) AS adjusted_close_snapshot,
-                MAX(CASE WHEN f.field_name = 'volume_snapshot' THEN r.int_value END) AS volume_snapshot,
-            FROM 
-                `wsb-hc-qasap-ae2e.{self.environment}.records` AS r
-            JOIN 
-                `wsb-hc-qasap-ae2e.{self.environment}.fields` AS f
-                ON r.field_id = f.field_id
-            JOIN 
-                `wsb-hc-qasap-ae2e.{self.environment}.hawk_identifiers` AS hi
-                ON r.hawk_id = hi.hawk_id
-            WHERE 
-                r.hawk_id IN UNNEST(@hawk_ids)
-                AND f.field_name IN ('adjusted_open_snapshot', 'adjusted_high_snapshot', 'adjusted_low_snapshot', 'adjusted_close_snapshot', 'volume_snapshot')
-                AND r.record_timestamp <= @timestamp
-            GROUP BY 
-                date, ticker
+        WITH latest_timestamp AS (
+          SELECT
+            MAX(r.record_timestamp) AS max_ts
+          FROM
+            `wsb-hc-qasap-ae2e.{self.environment}.records` AS r
+          WHERE
+            r.hawk_id IN UNNEST(@hawk_ids)
+            AND r.record_timestamp <= @timestamp
+        ),
+        records_data AS (
+          SELECT
+            r.record_timestamp AS date,
+            hi.value            AS ticker,
+            MAX(IF(f.field_name = 'adjusted_open_snapshot',  r.double_value, NULL)) AS adjusted_open_snapshot,
+            MAX(IF(f.field_name = 'adjusted_high_snapshot',  r.double_value, NULL)) AS adjusted_high_snapshot,
+            MAX(IF(f.field_name = 'adjusted_low_snapshot',   r.double_value, NULL)) AS adjusted_low_snapshot,
+            MAX(IF(f.field_name = 'adjusted_close_snapshot', r.double_value, NULL)) AS adjusted_close_snapshot,
+            MAX(IF(f.field_name = 'volume_snapshot',         r.int_value,    NULL)) AS volume_snapshot
+          FROM
+            `wsb-hc-qasap-ae2e.{self.environment}.records`            AS r
+          JOIN
+            `wsb-hc-qasap-ae2e.{self.environment}.fields`             AS f
+              ON r.field_id = f.field_id
+          JOIN
+            `wsb-hc-qasap-ae2e.{self.environment}.hawk_identifiers`   AS hi
+              ON r.hawk_id = hi.hawk_id
+          WHERE
+            r.hawk_id   IN UNNEST(@hawk_ids)
+            AND f.field_name IN (
+              'adjusted_open_snapshot', 'adjusted_high_snapshot',
+              'adjusted_low_snapshot',  'adjusted_close_snapshot',
+              'volume_snapshot'
+            )
+            AND r.record_timestamp = (SELECT max_ts FROM latest_timestamp)
+          GROUP BY
+            date, ticker
         )
-        SELECT DISTINCT
-            date,
-            ticker,
-            adjusted_open_snapshot,
-            adjusted_high_snapshot,
-            adjusted_low_snapshot,
-            adjusted_close_snapshot,
-            volume_snapshot,
-        FROM 
-            records_data
-        ORDER BY 
-            date;
+        SELECT
+          date,
+          ticker,
+          adjusted_open_snapshot,
+          adjusted_high_snapshot,
+          adjusted_low_snapshot,
+          adjusted_close_snapshot,
+          volume_snapshot
+        FROM
+          records_data
+        ORDER BY
+          ticker;
         """
 
         query_params = [
