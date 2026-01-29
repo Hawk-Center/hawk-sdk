@@ -33,14 +33,30 @@ class Universal:
 
         :param hawk_ids: A list of hawk_ids to fetch data for.
         :param field_ids: A list of field_ids to fetch data for.
-        :param start_date: The start date for the data query (YYYY-MM-DD).
-        :param end_date: The end date for the data query (YYYY-MM-DD).
-        :param interval: The interval for the data query (e.g., '1d', '1h', '1m').
+        :param start_date: The start date (YYYY-MM-DD). Ignored when interval='snapshot'.
+        :param end_date: The end date (YYYY-MM-DD), or cutoff timestamp (YYYY-MM-DD HH:MM:SS) for snapshot.
+        :param interval: Data interval (e.g., '1d', '1h'). Use 'snapshot' for point-in-time data.
         :return: A hawk DataObject containing the data.
         """
         return DataObject(
             name="universal_data",
             data=self.service.get_data(hawk_ids, field_ids, start_date, end_date, interval)
+        )
+
+    def get_latest_snapshot(
+        self,
+        hawk_ids: List[int],
+        field_ids: List[int]
+    ) -> DataObject:
+        """Fetch the most recent data available for the given hawk_ids and field_ids.
+
+        :param hawk_ids: A list of hawk_ids to fetch data for.
+        :param field_ids: A list of field_ids to fetch data for.
+        :return: A hawk DataObject containing the latest snapshot data.
+        """
+        return DataObject(
+            name="universal_latest_snapshot",
+            data=self.service.get_latest_snapshot(hawk_ids, field_ids)
         )
 
     def get_field_ids(self, field_names: List[str]) -> DataObject:

@@ -1,6 +1,6 @@
 # Universal
 
-## Query Data
+## Query Data (Date Range)
 
 ```python
 from hawk_sdk.api import Universal
@@ -17,7 +17,31 @@ response = universal.get_data(
 
 df = response.to_df()
 response.show()
-response.to_csv("universal_data.csv")
+```
+
+## Query Snapshot (Point-in-Time)
+
+Use `interval="snapshot"` to get the most recent data up to `end_date`:
+
+```python
+response = universal.get_data(
+    hawk_ids=[1, 2, 3],
+    field_ids=[17, 18, 19, 20, 21],
+    start_date="",
+    end_date="2024-12-01 15:00:00",
+    interval="snapshot"
+)
+```
+
+## Latest Snapshot
+
+Get the most recent data available (no timestamp needed):
+
+```python
+response = universal.get_latest_snapshot(
+    hawk_ids=[1, 2, 3],
+    field_ids=[17, 18, 19, 20, 21]
+)
 ```
 
 Output columns: `date`, `hawk_id`, `ticker`, plus one column per field. Missing values are `NaN`.

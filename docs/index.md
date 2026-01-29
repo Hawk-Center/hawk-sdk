@@ -34,7 +34,8 @@ export SERVICE_ACCOUNT_JSON='{"type":"service_account","project_id":"..."}'
 
     | Method | Description |
     |--------|-------------|
-    | `get_data(hawk_ids, field_ids, start_date, end_date, interval)` | Fetch data for specified hawks and fields |
+    | `get_data(hawk_ids, field_ids, start_date, end_date, interval)` | Fetch data (use `interval='snapshot'` for point-in-time) |
+    | `get_latest_snapshot(hawk_ids, field_ids)` | Fetch most recent data available |
     | `get_field_ids(field_names)` | Lookup field_ids by name |
     | `get_all_fields()` | List all available fields |
 
@@ -47,9 +48,14 @@ export SERVICE_ACCOUNT_JSON='{"type":"service_account","project_id":"..."}'
     |-----------|------|-------------|
     | `hawk_ids` | `List[int]` | Hawk IDs to query |
     | `field_ids` | `List[int]` | Field IDs to retrieve |
-    | `start_date` | `str` | Start date (`YYYY-MM-DD`) |
-    | `end_date` | `str` | End date (`YYYY-MM-DD`) |
-    | `interval` | `str` | Data interval (e.g., `1d`) |
+    | `start_date` | `str` | Start date (`YYYY-MM-DD`). Ignored for snapshot. |
+    | `end_date` | `str` | End date (`YYYY-MM-DD`) or timestamp (`YYYY-MM-DD HH:MM:SS`) for snapshot |
+    | `interval` | `str` | Data interval: `1d`, `1h`, etc. Use `snapshot` for point-in-time |
+
+    **get_latest_snapshot**
+    ```python
+    def get_latest_snapshot(hawk_ids: List[int], field_ids: List[int]) -> DataObject
+    ```
 
     Returns DataFrame with columns: `date`, `hawk_id`, `ticker`, plus one column per field. Missing values are `NaN`.
 
