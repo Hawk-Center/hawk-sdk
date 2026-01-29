@@ -1,156 +1,131 @@
-# Hawk SDK Documentation
+# Hawk SDK
 
-To view the source code visit [hawk-sdk](https://github.com/Hawk-Center/hawk-sdk).
+[Source Code](https://github.com/Hawk-Center/hawk-sdk)
 
-## Setup & Installation
-
-To install the Hawk SDK, run the following command:
+## Installation
 
 ```bash
 pip install hawk-sdk
 ```
 
-Set your environment variables to access the data:
-
+**Authentication** (one of):
 ```bash
-export GOOGLE_APPLICATION_CREDENTIALS="/path/to/your/service_account.json"
+export GOOGLE_APPLICATION_CREDENTIALS="/path/to/service_account.json"
 ```
-or
 ```bash
-export SERVICE_ACCOUNT_JSON="{\"type\":\"service_account\",\"project_id\":\"...\"}"
+export SERVICE_ACCOUNT_JSON='{"type":"service_account","project_id":"..."}'
 ```
 
-NOTE: The database and SDK use UTC time for all timestamps.
+!!! note
+    All timestamps are in UTC.
 
 ---
 
-# Docs
+## API Reference
+
+=== "Universal"
+
+    Query any combination of hawk_ids and field_ids.
+
+    ```python
+    from hawk_sdk.api import Universal
+    universal = Universal(environment="production")
+    ```
+
+    | Method | Description |
+    |--------|-------------|
+    | `get_data(hawk_ids, field_ids, start_date, end_date, interval)` | Fetch data for specified hawks and fields |
+    | `get_field_ids(field_names)` | Lookup field_ids by name |
+    | `get_all_fields()` | List all available fields |
+
+    **get_data**
+    ```python
+    def get_data(hawk_ids: List[int], field_ids: List[int], start_date: str, end_date: str, interval: str) -> DataObject
+    ```
+    
+    | Parameter | Type | Description |
+    |-----------|------|-------------|
+    | `hawk_ids` | `List[int]` | Hawk IDs to query |
+    | `field_ids` | `List[int]` | Field IDs to retrieve |
+    | `start_date` | `str` | Start date (`YYYY-MM-DD`) |
+    | `end_date` | `str` | End date (`YYYY-MM-DD`) |
+    | `interval` | `str` | Data interval (e.g., `1d`) |
+
+    Returns DataFrame with columns: `date`, `hawk_id`, `ticker`, plus one column per field. Missing values are `NaN`.
+
+    **get_field_ids**
+    ```python
+    def get_field_ids(field_names: List[str]) -> DataObject
+    ```
+
+    **get_all_fields**
+    ```python
+    def get_all_fields() -> DataObject
+    ```
 
 === "Futures"
 
-    The `Futures` class serves as an API to fetch open, high, low, close, volume, and open interest (OHLCVO) data from the Hawk Global Futures repository using specified date ranges and intervals.
-    
-    ### Initialization
-    
-    ```python
-    def __init__(self, environment: str = "production", credentials_path: str = None)
-    ```
-    
-    Initializes the `Futures` datasource with an environment and optional credentials file.
-    
-    - **environment**: (Optional) The GCP environment to use. The decides which dataset to query. Default is `"production"`. You may optionally set this to `"development"`.
-    
-    ### Methods
-    
-    #### get_ohlcvo
-    
-    ```python
-    def get_ohlcvo(self, start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> DataObject
-    ```
-    
-    Fetches OHLCVO data (open, high, low, close, volume, and open interest) for a given date range and list of Hawk IDs.
-    
-    - **start_date**: The start date for the data query, in the format `YYYY-MM-DD`.
-    - **end_date**: The end date for the data query, in the format `YYYY-MM-DD`.
-    - **interval**: The interval for the data query (e.g., `'1d'`).
-    - **hawk_ids**: A list of Hawk IDs to filter by.
-    - **Returns**: A `DataObject` containing the resulting OHLCVO data.
-
-    #### get_snapshot
+    Fetch OHLCVO (open, high, low, close, volume, open interest) data.
 
     ```python
-    def get_snapshot(self, timestamp: str, hawk_ids: List[int]) -> DataObject
+    from hawk_sdk.api import Futures
+    futures = Futures(environment="production")
     ```
-    
-    Fetches snapshot data for a given timestamp and list of Hawk IDs. The snapshot data includes key metrics such as the most recent values for close, high, low, cumulative volume, bid, and ask prices as of the specified timestamp.
-    
-    - **timestamp**: The cutoff timestamp for the data query, in the format `YYYY-MM-DD HH:MM:SS`.
-    - **hawk_ids**: A list of Hawk IDs to filter by.
-    - **Returns**: A `DataObject` containing the resulting snapshot data, including columns:
-        - `close_snapshot`
-        - `high_snapshot`
-        - `low_snapshot`
-        - `cvol_snapshot` (cumulative volume)
-        - `bid_snapshot`
-        - `ask_snapshot`
-        - Along with the associated `date` and `ticker` for each Hawk ID.
+
+    | Method | Description |
+    |--------|-------------|
+    | `get_ohlcvo(start_date, end_date, interval, hawk_ids)` | Fetch OHLCVO data |
+    | `get_snapshot(timestamp, hawk_ids)` | Fetch point-in-time snapshot |
+
+    **get_ohlcvo**
+    ```python
+    def get_ohlcvo(start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> DataObject
+    ```
+
+    | Parameter | Type | Description |
+    |-----------|------|-------------|
+    | `start_date` | `str` | Start date (`YYYY-MM-DD`) |
+    | `end_date` | `str` | End date (`YYYY-MM-DD`) |
+    | `interval` | `str` | Data interval (e.g., `1d`) |
+    | `hawk_ids` | `List[int]` | Hawk IDs to query |
+
+    **get_snapshot**
+    ```python
+    def get_snapshot(timestamp: str, hawk_ids: List[int]) -> DataObject
+    ```
+
+    | Parameter | Type | Description |
+    |-----------|------|-------------|
+    | `timestamp` | `str` | Cutoff time (`YYYY-MM-DD HH:MM:SS`) |
+    | `hawk_ids` | `List[int]` | Hawk IDs to query |
+
+    Returns: `close_snapshot`, `high_snapshot`, `low_snapshot`, `cvol_snapshot`, `bid_snapshot`, `ask_snapshot`
 
 === "System"
 
-    The `System` class serves as an API to fetch Hawk IDs based on a list of tickers from the Hawk Global System repository.
-    
-    ### Initialization
-    
+    Lookup Hawk IDs from tickers.
+
     ```python
-    def __init__(self, environment: str = "production", credentials_path: str = None)
+    from hawk_sdk.api import System
+    system = System(environment="production")
     ```
-    
-    Initializes the `System` datasource with an environment and optional credentials file.
-    
-    - **environment**: (Optional) The GCP environment to use. The decides which dataset to query. Default is `"production"`. You may optionally set this to `"development"`.
-    
-    ### Methods
-    
-    #### get_hawk_ids
-    
+
+    **get_hawk_ids**
     ```python
-    def get_hawk_ids(self, tickers: List[str]) -> DataObject
+    def get_hawk_ids(tickers: List[str]) -> DataObject
     ```
-    
-    Fetches Hawk IDs based on a list of ticker strings.
-    
-    - **tickers**: A list of ticker strings to filter by.
-    - **Returns**: A `DataObject` containing the resulting Hawk IDs.
+
+    | Parameter | Type | Description |
+    |-----------|------|-------------|
+    | `tickers` | `List[str]` | Ticker symbols to lookup |
 
 === "DataObject"
 
-    The `DataObject` class is returned by the SDK classes. It contains the data for the response and allows you to access the data in a more structured way.
+    All API methods return a `DataObject` with these methods:
 
-    ### Methods
-    
-    #### to_df
-    
-    ```python
-    def to_df(self) -> pd.DataFrame: ...
-    ```
-
-    Exports the data into a Pandas DataFrame.
-    
-    - **Returns**: A `pd.DataFrame` containing the data.
-    
-    #### to_csv
-    
-    ```python
-    def to_csv(self, file_name: str) -> None: ...
-    ```
-
-    Exports the data to a CSV file.
-    
-    - **file_name**: The name of the output CSV file.
-    - **Returns**: None
-    
-    #### to_xlsx
-    
-    ```python
-    def to_xlsx(self, file_name: str) -> None: ...
-    ```
-
-    Exports the data to an Excel (.xlsx) file.
-    
-    - **file_name**: The name of the output Excel file.
-    - **Returns**: None
-    
-    #### show
-    
-    ```python
-    def show(self, n: int = 5) -> None: ...
-    ```
-    
-    Displays the first `n` rows of the data.
-    
-    - **n**: The number of rows to display. Default is 5.
-    - **Returns**: None, but prints the data to the console.
-
-=== "Core"
-    
-    The `Core` module contains core functionality for the entire system. Things such as universal enums, constants, and utility functions are defined here.
+    | Method | Description |
+    |--------|-------------|
+    | `to_df()` | Convert to pandas DataFrame |
+    | `to_csv(filename)` | Export to CSV |
+    | `to_xlsx(filename)` | Export to Excel |
+    | `show(n=5)` | Print first n rows |
