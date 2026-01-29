@@ -101,6 +101,172 @@ class UniversalRepository:
             logging.error(f"Failed to fetch universal data: {e}")
             raise
 
+    def fetch_snapshot(
+        self,
+        hawk_ids: List[int],
+        field_ids: List[int],
+        timestamp: str
+    ) -> Iterator[dict]:
+        """Fetches the most recent snapshot data from BigQuery for the given timestamp.
+
+        :param hawk_ids: A list of hawk_ids to fetch data for.
+        :param field_ids: A list of field_ids to fetch data for.
+        :param timestamp: The cutoff timestamp (YYYY-MM-DD HH:MM:SS).
+        :return: An iterator over raw data rows.
+        """
+        query = f"""
+        WITH field_info AS (
+          SELECT 
+            field_id,
+            field_name
+          FROM 
+            `wsb-hc-qasap-ae2e.{self.environment}.fields`
+          WHERE 
+            field_id IN UNNEST(@field_ids)
+        ),
+        latest_timestamp AS (
+          SELECT
+            MAX(r.record_timestamp) AS max_ts
+          FROM
+            `wsb-hc-qasap-ae2e.{self.environment}.records` AS r
+          WHERE
+            r.hawk_id IN UNNEST(@hawk_ids)
+            AND r.field_id IN UNNEST(@field_ids)
+            AND r.record_timestamp <= @timestamp
+        ),
+        records_data AS (
+          SELECT 
+            r.record_timestamp AS date,
+            r.hawk_id,
+            hi.value AS ticker,
+            f.field_id,
+            f.field_name,
+            r.double_value,
+            r.int_value,
+            r.char_value
+          FROM 
+            `wsb-hc-qasap-ae2e.{self.environment}.records` AS r
+          JOIN 
+            field_info AS f
+            ON r.field_id = f.field_id
+          LEFT JOIN 
+            `wsb-hc-qasap-ae2e.{self.environment}.hawk_identifiers` AS hi
+            ON r.hawk_id = hi.hawk_id AND hi.id_type = 'TICKER'
+          WHERE 
+            r.hawk_id IN UNNEST(@hawk_ids)
+            AND r.record_timestamp = (SELECT max_ts FROM latest_timestamp)
+        )
+        SELECT 
+          date,
+          hawk_id,
+          ticker,
+          field_id,
+          field_name,
+          double_value,
+          int_value,
+          char_value
+        FROM 
+          records_data
+        ORDER BY 
+          hawk_id, field_id;
+        """
+
+        query_params = [
+            bigquery.ArrayQueryParameter("hawk_ids", "INT64", hawk_ids),
+            bigquery.ArrayQueryParameter("field_ids", "INT64", field_ids),
+            bigquery.ScalarQueryParameter("timestamp", "TIMESTAMP", timestamp),
+        ]
+
+        job_config = bigquery.QueryJobConfig(query_parameters=query_params)
+
+        try:
+            query_job = self.bq_client.query(query, job_config=job_config)
+            return query_job.result()
+        except Exception as e:
+            logging.error(f"Failed to fetch universal snapshot data: {e}")
+            raise
+
+    def fetch_latest_snapshot(
+        self,
+        hawk_ids: List[int],
+        field_ids: List[int]
+    ) -> Iterator[dict]:
+        """Fetches the most recent data from BigQuery for the given hawk_ids and field_ids.
+
+        :param hawk_ids: A list of hawk_ids to fetch data for.
+        :param field_ids: A list of field_ids to fetch data for.
+        :return: An iterator over raw data rows.
+        """
+        query = f"""
+        WITH field_info AS (
+          SELECT 
+            field_id,
+            field_name
+          FROM 
+            `wsb-hc-qasap-ae2e.{self.environment}.fields`
+          WHERE 
+            field_id IN UNNEST(@field_ids)
+        ),
+        latest_timestamp AS (
+          SELECT
+            MAX(r.record_timestamp) AS max_ts
+          FROM
+            `wsb-hc-qasap-ae2e.{self.environment}.records` AS r
+          WHERE
+            r.hawk_id IN UNNEST(@hawk_ids)
+            AND r.field_id IN UNNEST(@field_ids)
+        ),
+        records_data AS (
+          SELECT 
+            r.record_timestamp AS date,
+            r.hawk_id,
+            hi.value AS ticker,
+            f.field_id,
+            f.field_name,
+            r.double_value,
+            r.int_value,
+            r.char_value
+          FROM 
+            `wsb-hc-qasap-ae2e.{self.environment}.records` AS r
+          JOIN 
+            field_info AS f
+            ON r.field_id = f.field_id
+          LEFT JOIN 
+            `wsb-hc-qasap-ae2e.{self.environment}.hawk_identifiers` AS hi
+            ON r.hawk_id = hi.hawk_id AND hi.id_type = 'TICKER'
+          WHERE 
+            r.hawk_id IN UNNEST(@hawk_ids)
+            AND r.record_timestamp = (SELECT max_ts FROM latest_timestamp)
+        )
+        SELECT 
+          date,
+          hawk_id,
+          ticker,
+          field_id,
+          field_name,
+          double_value,
+          int_value,
+          char_value
+        FROM 
+          records_data
+        ORDER BY 
+          hawk_id, field_id;
+        """
+
+        query_params = [
+            bigquery.ArrayQueryParameter("hawk_ids", "INT64", hawk_ids),
+            bigquery.ArrayQueryParameter("field_ids", "INT64", field_ids),
+        ]
+
+        job_config = bigquery.QueryJobConfig(query_parameters=query_params)
+
+        try:
+            query_job = self.bq_client.query(query, job_config=job_config)
+            return query_job.result()
+        except Exception as e:
+            logging.error(f"Failed to fetch latest snapshot data: {e}")
+            raise
+
     def fetch_field_ids_by_name(self, field_names: List[str]) -> Iterator[dict]:
         """Fetches field_ids for the given list of field names from BigQuery.
 

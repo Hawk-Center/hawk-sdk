@@ -35,12 +35,29 @@ class UniversalService:
 
         :param hawk_ids: A list of hawk_ids to fetch data for.
         :param field_ids: A list of field_ids to fetch data for.
-        :param start_date: The start date for the data query (YYYY-MM-DD).
-        :param end_date: The end date for the data query (YYYY-MM-DD).
-        :param interval: The interval for the data query (e.g., '1d', '1h', '1m').
+        :param start_date: The start date for the data query (YYYY-MM-DD). Ignored for snapshot.
+        :param end_date: The end date (YYYY-MM-DD) or timestamp (YYYY-MM-DD HH:MM:SS) for snapshot.
+        :param interval: The interval for the data query. Use 'snapshot' for point-in-time data.
         :return: A pandas DataFrame containing the normalized data.
         """
-        raw_data = self.repository.fetch_data(hawk_ids, field_ids, start_date, end_date, interval)
+        if interval == "snapshot":
+            raw_data = self.repository.fetch_snapshot(hawk_ids, field_ids, end_date)
+        else:
+            raw_data = self.repository.fetch_data(hawk_ids, field_ids, start_date, end_date, interval)
+        return self._pivot_data(raw_data)
+
+    def get_latest_snapshot(
+        self,
+        hawk_ids: List[int],
+        field_ids: List[int]
+    ) -> pd.DataFrame:
+        """Fetches the most recent data available for the given hawk_ids and field_ids.
+
+        :param hawk_ids: A list of hawk_ids to fetch data for.
+        :param field_ids: A list of field_ids to fetch data for.
+        :return: A pandas DataFrame containing the normalized data.
+        """
+        raw_data = self.repository.fetch_latest_snapshot(hawk_ids, field_ids)
         return self._pivot_data(raw_data)
 
     def get_field_ids(self, field_names: List[str]) -> pd.DataFrame:
