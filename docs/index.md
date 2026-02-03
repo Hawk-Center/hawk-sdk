@@ -69,43 +69,60 @@ export SERVICE_ACCOUNT_JSON='{"type":"service_account","project_id":"..."}'
     def get_all_fields() -> DataObject
     ```
 
-=== "Futures"
+=== "UniversalSupplemental"
 
-    Fetch OHLCVO (open, high, low, close, volume, open interest) data.
+    Query supplemental data not tied to hawk_ids (identified by source and series_id).
 
     ```python
-    from hawk_sdk.api import Futures
-    futures = Futures(environment="production")
+    from hawk_sdk.api import UniversalSupplemental
+    supplemental = UniversalSupplemental(environment="production")
     ```
 
     | Method | Description |
     |--------|-------------|
-    | `get_ohlcvo(start_date, end_date, interval, hawk_ids)` | Fetch OHLCVO data |
-    | `get_snapshot(timestamp, hawk_ids)` | Fetch point-in-time snapshot |
+    | `get_data(sources, series_ids, start_date, end_date)` | Fetch data for specific series |
+    | `get_data_by_source(sources, start_date, end_date)` | Fetch all series for given sources |
+    | `get_latest_data(sources, series_ids)` | Fetch most recent data for each series |
+    | `get_all_series(source=None)` | List available series metadata |
+    | `get_available_sources()` | List available data sources |
 
-    **get_ohlcvo**
+    **get_data**
     ```python
-    def get_ohlcvo(start_date: str, end_date: str, interval: str, hawk_ids: List[int]) -> DataObject
+    def get_data(sources: List[str], series_ids: List[str], start_date: str, end_date: str) -> DataObject
     ```
-
+    
     | Parameter | Type | Description |
     |-----------|------|-------------|
+    | `sources` | `List[str]` | Data source identifiers (e.g., `['eia_petroleum']`) |
+    | `series_ids` | `List[str]` | Series codes (e.g., `['WCESTUS1', 'WCRFPUS2']`) |
     | `start_date` | `str` | Start date (`YYYY-MM-DD`) |
     | `end_date` | `str` | End date (`YYYY-MM-DD`) |
-    | `interval` | `str` | Data interval (e.g., `1d`) |
-    | `hawk_ids` | `List[int]` | Hawk IDs to query |
 
-    **get_snapshot**
+    **get_data_by_source**
     ```python
-    def get_snapshot(timestamp: str, hawk_ids: List[int]) -> DataObject
+    def get_data_by_source(sources: List[str], start_date: str, end_date: str) -> DataObject
     ```
 
-    | Parameter | Type | Description |
-    |-----------|------|-------------|
-    | `timestamp` | `str` | Cutoff time (`YYYY-MM-DD HH:MM:SS`) |
-    | `hawk_ids` | `List[int]` | Hawk IDs to query |
+    Fetches all series for the given sources without specifying individual series_ids.
 
-    Returns: `close_snapshot`, `high_snapshot`, `low_snapshot`, `cvol_snapshot`, `bid_snapshot`, `ask_snapshot`
+    **get_latest_data**
+    ```python
+    def get_latest_data(sources: List[str], series_ids: List[str]) -> DataObject
+    ```
+
+    Returns the most recent data point for each specified series.
+
+    **get_all_series**
+    ```python
+    def get_all_series(source: Optional[str] = None) -> DataObject
+    ```
+
+    Returns DataFrame with columns: `source`, `series_id`, `name`, `description`, `frequency`, `unit`.
+
+    **get_available_sources**
+    ```python
+    def get_available_sources() -> DataObject
+    ```
 
 === "System"
 
